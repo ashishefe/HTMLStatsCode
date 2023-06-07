@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monty Hall Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <label for="iterations">Number of iterations:</label>
+    <input type="number" id="iterations" value="10000" min="1">
+    <button onclick="runSimulation()">Run Simulation</button>
+    <canvas id="montyHallChart"></canvas>
+
+    <script>
+        function runSimulation() {
+            const totalIterations = document.getElementById("iterations").value;
+            const switchWinPercentages = [];
+            const stayWinPercentages = [];
+
+            let switchWins = 0;
+            let stayWins = 0;
+
+            const ctx = document.getElementById('montyHallChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: totalIterations }, (_, i) => i + 1),
+                    datasets: [
+                        {
+                            label: 'Switch Win Percentage',
+                            data: switchWinPercentages,
+                            fill: false,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Stay Win Percentage',
+                            data: stayWinPercentages,
+                            fill: false,
+                            borderColor: 'rgb(255, 99, 132)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    animation: {
+                        duration: 0
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Monty Hall Simulation'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Iterations'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Win Percentage (%)'
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            function updateChart() {
+                if (switchWinPercentages.length < totalIterations) {
+                    const doors = [0, 0, 0];
+                    const prizeDoor = Math.floor(Math.random() * 3);
+                    doors[prizeDoor] = 1;
+
+                    let choice = Math.floor(Math.random() * 3);
+
+                    let montyOpen;
+                    do {
+                        montyOpen = Math.floor(Math.random() * 3);
+                    } while (doors[montyOpen] === 1 || montyOpen === choice);
+
+                    let switchDoor;
+                    do {
+                        switchDoor = Math.floor(Math.random() * 3);
+                    } while (switchDoor === choice || switchDoor === montyOpen);
+
+                    if (doors[choice] === 1) stayWins++;
+                    if (doors[switchDoor] === 1) switchWins++;
+
+                    switchWinPercentages.push((switchWins / (switchWinPercentages.length + 1)) * 100);
+                    stayWinPercentages.push((stayWins / (stayWinPercentages.length + 1)) * 100);
+
+                    chart.update();
+
+                    requestAnimationFrame(updateChart);
+                }
+            }
+
+            updateChart();
+        }
+    </script>
+</body>
+</html>
